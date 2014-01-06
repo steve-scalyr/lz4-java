@@ -172,6 +172,8 @@
       <includepath path="${java.home}/../include" />
       <includepath path="${java.home}/../include/${platform}/" />
       <includepath path="${build}/jni-headers" />
+      <includepath path="/Library/Java/JavaVirtualMachines/1.7.0.jdk/Contents/Home/include" />
+      <includepath path="/Library/Java/JavaVirtualMachines/1.7.0.jdk/Contents/Home/include/darwin" />
       <fileset dir="${src}/lz4" includes="lz4.c, lz4hc.c, xxhash.c" />
       <fileset dir="${src}/jni" includes="*.c" />
       <linker />
