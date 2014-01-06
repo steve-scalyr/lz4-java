@@ -45,6 +45,13 @@ public abstract class LZ4Compressor {
   public abstract int compress(byte[] src, int srcOff, int srcLen, byte[] dest, int destOff, int maxDestLen);
 
   /**
+   * Adds "quality" parameter. Currently, this parameter is ignored for all implementations except LZ4HCJNICompressor.
+   */
+  public int compress(byte[] src, int srcOff, int srcLen, byte[] dest, int destOff, int maxDestLen, int quality) {
+    return compress(src, srcOff, srcLen, dest, destOff, maxDestLen);
+  }
+
+  /**
    * Convenience method, equivalent to calling
    * {@link #compress(byte[], int, int, byte[], int, int) compress(src, srcOff, srcLen, dest, destOff, dest.length - destOff)}.
    */

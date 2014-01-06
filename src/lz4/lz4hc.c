@@ -248,6 +248,7 @@ typedef struct
     HTYPE hashTable[HASHTABLESIZE];
     U16 chainTable[MAXD];
     const BYTE* nextToUpdate;
+    int maxAttempts;
 } LZ4HC_Data_Structure;
 
 
@@ -340,6 +341,7 @@ FORCE_INLINE void LZ4_initHC (LZ4HC_Data_Structure* hc4, const BYTE* base)
     hc4->base = base;
     hc4->inputBuffer = base;
     hc4->end = base;
+    hc4->maxAttempts = MAX_NB_ATTEMPTS;
 }
 
 
@@ -421,7 +423,7 @@ FORCE_INLINE int LZ4HC_InsertAndFindBestMatch (LZ4HC_Data_Structure* hc4, const 
     HTYPE* const HashTable = hc4->hashTable;
     const BYTE* ref;
     INITBASE(base,hc4->base);
-    int nbAttempts=MAX_NB_ATTEMPTS;
+    int nbAttempts=hc4->maxAttempts;
     size_t repl=0, ml=0;
     U16 delta=0;  // useless assignment, to remove an uninitialization warning
 
@@ -489,7 +491,7 @@ FORCE_INLINE int LZ4HC_InsertAndGetWiderMatch (LZ4HC_Data_Structure* hc4, const 
     HTYPE* const HashTable = hc4->hashTable;
     INITBASE(base,hc4->base);
     const BYTE*  ref;
-    int nbAttempts = MAX_NB_ATTEMPTS;
+    int nbAttempts = hc4->maxAttempts;
     int delta = (int)(ip-startLimit);
 
     // First Match
@@ -792,6 +794,19 @@ int LZ4_compressHC(const char* source, char* dest, int inputSize)
     return result;
 }
 
+int LZ4_compressHCTunable(const char* source, char* dest, int inputSize, int maxAttempts)
+{
+    void* ctx = LZ4_createHC(source);
+    int result;
+    if (ctx==NULL) return 0;
+
+    ((LZ4HC_Data_Structure*)ctx)->maxAttempts = maxAttempts;
+    result = LZ4HC_compress_generic (ctx, source, dest, inputSize, 0, noLimit);
+
+    LZ4_freeHC(ctx);
+    return result;
+}
+
 int LZ4_compressHC_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize)
 {
     return LZ4HC_compress_generic (LZ4HC_Data, source, dest, inputSize, 0, noLimit);
@@ -804,6 +819,19 @@ int LZ4_compressHC_limitedOutput(const char* source, char* dest, int inputSize, 
     int result;
     if (ctx==NULL) return 0;
 
+    result = LZ4HC_compress_generic (ctx, source, dest, inputSize, maxOutputSize, limitedOutput);
+
+    LZ4_freeHC(ctx);
+    return result;
+}
+
+int LZ4_compressHC_limitedOutputTunable(const char* source, char* dest, int inputSize, int maxOutputSize, int maxAttempts)
+{
+    void* ctx = LZ4_createHC(source);
+    int result;
+    if (ctx==NULL) return 0;
+
+    ((LZ4HC_Data_Structure*)ctx)->maxAttempts = maxAttempts;
     result = LZ4HC_compress_generic (ctx, source, dest, inputSize, maxOutputSize, limitedOutput);
 
     LZ4_freeHC(ctx);

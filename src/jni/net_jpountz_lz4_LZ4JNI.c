@@ -97,6 +97,38 @@ JNIEXPORT jint JNICALL Java_net_jpountz_lz4_LZ4JNI_LZ4_1compressHC
 
 /*
  * Class:     net_jpountz_lz4_LZ4
+ * Method:    LZ4_compressHC
+ * Signature: ([BII[BI)I
+ */
+JNIEXPORT jint JNICALL Java_net_jpountz_lz4_LZ4JNI_LZ4_1compressHCTunable
+  (JNIEnv *env, jclass cls, jbyteArray src, jint srcOff, jint srcLen, jbyteArray dest, jint destOff, jint maxDestLen, jint searchDepth) {
+
+  char* in;
+  char* out;
+  jint compressed;
+  
+  in = (char*) (*env)->GetPrimitiveArrayCritical(env, src, 0);
+  if (in == NULL) {
+    throw_OOM(env);
+    return 0;
+  } 
+  out = (char*) (*env)->GetPrimitiveArrayCritical(env, dest, 0);
+  if (out == NULL) {
+    throw_OOM(env);
+    return 0;
+  }
+
+  compressed = LZ4_compressHC_limitedOutputTunable(in + srcOff, out + destOff, srcLen, maxDestLen, searchDepth);
+
+  (*env)->ReleasePrimitiveArrayCritical(env, src, in, 0);
+  (*env)->ReleasePrimitiveArrayCritical(env, src, out, 0);
+
+  return compressed;
+
+}
+
+/*
+ * Class:     net_jpountz_lz4_LZ4
  * Method:    LZ4_decompress
  * Signature: ([BI[BII)I
  */

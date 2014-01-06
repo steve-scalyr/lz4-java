@@ -20,15 +20,35 @@ import static net.jpountz.util.Utils.checkRange;
  * High compression {@link LZ4Compressor}s implemented with JNI bindings to the
  * original C implementation of LZ4.
  */
-final class LZ4HCJNICompressor extends LZ4Compressor {
+public final class LZ4HCJNICompressor extends LZ4Compressor {
 
   public static final LZ4Compressor INSTANCE = new LZ4HCJNICompressor();
+
+  /**
+   * Controls the number of potential matches the compressor will examine. Lower values yield faster
+   * compression but worse compression ratio.
+   */
+  public static int maxSearchDepth = 256;
 
   @Override
   public int compress(byte[] src, int srcOff, int srcLen, byte[] dest, int destOff, int maxDestLen) {
     checkRange(src, srcOff, srcLen);
     checkRange(dest, destOff, maxDestLen);
-    final int result = LZ4JNI.LZ4_compressHC(src, srcOff, srcLen, dest, destOff, maxDestLen);
+    final int result = LZ4JNI.LZ4_compressHCTunable(src, srcOff, srcLen, dest, destOff, maxDestLen, maxSearchDepth);
+    if (result <= 0) {
+      throw new LZ4Exception();
+    }
+    return result;
+  }
+
+  /**
+   * @param quality: see maxSearchDepth.
+   */
+  @Override
+  public int compress(byte[] src, int srcOff, int srcLen, byte[] dest, int destOff, int maxDestLen, int quality) {
+    checkRange(src, srcOff, srcLen);
+    checkRange(dest, destOff, maxDestLen);
+    final int result = LZ4JNI.LZ4_compressHCTunable(src, srcOff, srcLen, dest, destOff, maxDestLen, quality);
     if (result <= 0) {
       throw new LZ4Exception();
     }

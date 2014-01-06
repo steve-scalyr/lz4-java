@@ -49,6 +49,8 @@ LZ4_compressHC :
         Worst case size evaluation is provided by function LZ4_compressBound() (see "lz4.h")
 */
 
+int LZ4_compressHCTunable (const char* source, char* dest, int inputSize, int maxAttempts);
+
 int LZ4_compressHC_limitedOutput (const char* source, char* dest, int inputSize, int maxOutputSize);
 /*
 LZ4_compress_limitedOutput() :
@@ -60,6 +62,13 @@ LZ4_compress_limitedOutput() :
     maxOutputSize : is maximum allowed size into the destination buffer (which must be already allocated)
     return : the number of output bytes written in buffer 'dest'
              or 0 if compression fails.
+*/
+
+int LZ4_compressHC_limitedOutputTunable (const char* source, char* dest, int inputSize, int maxOutputSize, int maxAttempts);
+/*
+LZ4_compress_limitedOutputTunable() :
+    Like LZ4_compress_limitedOutput(), but adds maxAttempts argument to controll compression cost / quality.
+    Standard value is 256.
 */
 
 
